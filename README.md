@@ -72,7 +72,8 @@ On first run, you'll be prompted to create a master password. This password prot
 4. Edit connection         - Modify existing connection details
 5. Delete connection       - Remove a saved connection
 6. Export connections      - Backup connections to JSON file
-7. Exit                    - Close the application
+7. Import connections      - Restore connections from backup
+8. Exit                    - Close the application
 ```
 
 ### Adding a Connection
@@ -104,6 +105,69 @@ Description: Main computer in living room
    - **On Windows**: Launch PuTTY if available, otherwise use SSH
    - **On macOS/Linux**: Use the terminal SSH client
    - Automatically pass credentials if password is saved
+
+### Export/Import Connections (Transfer Between Computers)
+
+The export and import features allow you to easily transfer your SSH connections between computers.
+
+#### Exporting (Computer 1)
+
+1. Select option 6 from the main menu
+2. Enter a filename (e.g., `my_connections.json`)
+3. The file will be saved with all your connections and passwords
+4. Transfer this file to your other computer (USB drive, cloud, etc.)
+
+Example:
+```
+Select option: 6
+Enter export filename: my_connections.json
+✓ Connections exported to my_connections.json
+⚠️  Warning: This file contains passwords. Keep it secure!
+```
+
+#### Importing (Computer 2)
+
+1. Copy the exported JSON file to your second computer
+2. Run SSH Manager on the second computer
+3. Select option 7 from the main menu
+4. Enter the filename to import
+5. Choose import mode:
+   - **Merge (m)**: Add imported connections to existing ones
+   - **Replace (r)**: Delete all existing connections and replace with imported ones
+
+**Merge Mode** - Handles conflicts intelligently:
+- If a connection name already exists, you'll be prompted:
+  - **Keep (k)**: Keep your existing connection
+  - **Overwrite (o)**: Replace with the imported connection
+  - **Skip (s)**: Don't import this connection
+
+Example:
+```
+Select option: 7
+Enter import filename: my_connections.json
+
+Found 5 connection(s) to import:
+  - living-room-pc
+  - bedroom-pc
+  - garage-pi
+  - office-server
+  - remote-vps
+
+Import mode - (m)erge or (r)eplace all? (m/r): m
+
+✓ Import complete!
+  Added/Updated: 5 connection(s)
+```
+
+**Replace Mode** - Complete replacement:
+- Deletes ALL existing connections
+- Imports all connections from the file
+- Requires confirmation ("yes" to proceed)
+
+**Use Cases:**
+- **Fresh Setup**: Use Replace mode to quickly set up a new computer
+- **Sync Updates**: Use Merge mode to add new connections to an existing setup
+- **Backup/Restore**: Export regularly, import to restore after system reset
 
 ### Security Features
 

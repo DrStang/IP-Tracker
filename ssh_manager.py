@@ -383,6 +383,92 @@ class SSHManager:
         except Exception as e:
             print(f"✗ Error exporting: {e}")
 
+    def import_connections(self):
+        """Import connections from a JSON file"""
+        print("\n=== Import Connections ===")
+
+        import_file = input("Enter import filename (e.g., backup.json): ").strip()
+        if not import_file:
+            print("✗ Invalid filename.")
+            return
+
+        if not os.path.exists(import_file):
+            print(f"✗ File '{import_file}' not found.")
+            return
+
+        try:
+            with open(import_file, 'r') as f:
+                imported_connections = json.load(f)
+
+            if not imported_connections:
+                print("✗ No connections found in file.")
+                return
+
+            # Load existing connections
+            existing_connections = self.load_connections()
+
+            # Show what will be imported
+            print(f"\nFound {len(imported_connections)} connection(s) to import:")
+            for name in imported_connections.keys():
+                print(f"  - {name}")
+
+            print()
+            import_mode = input("Import mode - (m)erge or (r)eplace all? (m/r): ").strip().lower()
+
+            if import_mode == 'r':
+                # Replace all connections
+                confirm = input("⚠️  This will DELETE all existing connections! Continue? (yes/no): ")
+                if confirm.lower() != 'yes':
+                    print("Import cancelled.")
+                    return
+                existing_connections = {}
+
+            # Merge or add connections
+            conflicts = []
+            new_additions = []
+
+            for name, conn in imported_connections.items():
+                if name in existing_connections and import_mode == 'm':
+                    conflicts.append(name)
+                else:
+                    existing_connections[name] = conn
+                    new_additions.append(name)
+
+            # Handle conflicts
+            if conflicts:
+                print(f"\n⚠️  Found {len(conflicts)} connection(s) that already exist:")
+                for name in conflicts:
+                    print(f"\n  Connection: {name}")
+                    print(f"    Existing: {existing_connections[name]['username']}@{existing_connections[name]['host']}")
+                    print(f"    Import:   {imported_connections[name]['username']}@{imported_connections[name]['host']}")
+
+                    choice = input(f"  (k)eep existing, (o)verwrite, or (s)kip? (k/o/s): ").strip().lower()
+                    if choice == 'o':
+                        existing_connections[name] = imported_connections[name]
+                        new_additions.append(name)
+                        print(f"  ✓ Overwritten")
+                    elif choice == 'k':
+                        print(f"  ✓ Kept existing")
+                    else:
+                        print(f"  ✓ Skipped")
+
+            # Save the merged connections
+            self.save_connections(existing_connections)
+
+            # Summary
+            print(f"\n✓ Import complete!")
+            if import_mode == 'r':
+                print(f"  Replaced all connections with {len(existing_connections)} imported connection(s)")
+            else:
+                print(f"  Added/Updated: {len(new_additions)} connection(s)")
+                if conflicts:
+                    print(f"  Conflicts handled: {len(conflicts)}")
+
+        except json.JSONDecodeError:
+            print(f"✗ Error: Invalid JSON file format.")
+        except Exception as e:
+            print(f"✗ Error importing: {e}")
+
     def show_menu(self):
         """Display main menu"""
         while True:
@@ -395,10 +481,11 @@ class SSHManager:
             print("4. Edit connection")
             print("5. Delete connection")
             print("6. Export connections (backup)")
-            print("7. Exit")
+            print("7. Import connections (restore)")
+            print("8. Exit")
             print()
 
-            choice = input("Select an option (1-7): ").strip()
+            choice = input("Select an option (1-8): ").strip()
 
             if choice == '1':
                 self.add_connection()
@@ -413,6 +500,8 @@ class SSHManager:
             elif choice == '6':
                 self.export_connections()
             elif choice == '7':
+                self.import_connections()
+            elif choice == '8':
                 print("\nGoodbye!")
                 sys.exit(0)
             else:

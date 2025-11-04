@@ -101,6 +101,24 @@ Port: 22
 2. **Passwords**: Save passwords for quick access, or leave blank for SSH key auth
 3. **Port**: Most SSH servers use port 22 (default)
 4. **Backup**: Use option 6 to export connections regularly
+5. **Multiple Computers**: Export from one computer, import on another - no need to re-enter!
+
+## Transfer to Another Computer
+
+**On Computer 1:**
+```
+Select option: 6 (Export)
+Enter filename: my_ssh_connections.json
+Copy this file to Computer 2 (USB, cloud, etc.)
+```
+
+**On Computer 2:**
+```
+Select option: 7 (Import)
+Enter filename: my_ssh_connections.json
+Choose: (m)erge or (r)eplace
+Done! All your connections are now on Computer 2!
+```
 
 ## Need Help?
 
@@ -112,7 +130,8 @@ Run the app and explore the menu:
 4. Edit connection         - Update details
 5. Delete connection       - Remove a connection
 6. Export connections      - Backup to JSON
-7. Exit                    - Quit
+7. Import connections      - Restore from JSON
+8. Exit                    - Quit
 ```
 
 See README.md for detailed documentation.
